@@ -1,11 +1,15 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm install --prefix apps/web-app && cd apps/web-app && npm run build",
-  "outputDirectory": "apps/web-app/.next",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
   "installCommand": "npm install",
   "functions": {
-    "apps/web-app/app/api/**/*.{js,ts}": {
+    "app/**": {
       "maxDuration": 30
     }
+  },
+  "regions": ["iad1"],
+  "env": {
+    "NODE_ENV": "production"
   }
 }
