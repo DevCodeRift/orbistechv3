@@ -20,7 +20,7 @@ export function createPrismaClient(tenantId?: string) {
     return prisma.$extends({
       query: {
         $allModels: {
-          async $allOperations({ operation, model, args, query }) {
+          async $allOperations({ operation, model, args, query }: any) {
             // Set tenant context for RLS
             await prisma.$executeRaw`SELECT set_config('app.current_tenant_id', ${tenantId}, true)`;
             return query(args);
