@@ -1,10 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "turbo build --filter=@orbistech/web-app...",
+  "buildCommand": "cd apps/web-app && npm run build",
   "outputDirectory": "apps/web-app/.next",
   "installCommand": "npm install",
-  "framework": "nextjs",
-  "rootDirectory": "apps/web-app",
   "functions": {
     "apps/web-app/app/api/**/*.js": {
       "maxDuration": 30

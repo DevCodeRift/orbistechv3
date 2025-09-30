@@ -16,14 +16,6 @@ const nextConfig = {
       'politicsandwar.com'
     ]
   },
-  async rewrites() {
-    return [
-      {
-        source: '/',
-        destination: '/dashboard'
-      }
-    ];
-  }
 };
 
 module.exports = nextConfig;
