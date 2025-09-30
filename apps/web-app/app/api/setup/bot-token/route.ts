@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { getAuthOptions } from '../../../../lib/auth';
+import { getAuthOptions } from '../../auth-utils';
 import { prisma, TenantService } from '@orbistech/database';
 import { encryptBotToken } from '@orbistech/encryption';
 

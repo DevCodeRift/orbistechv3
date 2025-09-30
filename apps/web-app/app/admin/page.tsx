@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { UserService } from '@orbistech/database';
-import { authOptions } from '../../lib/auth';
+import { authOptions } from '../auth-utils';
 import { AdminDashboard } from './components/admin-dashboard';
 
 export default async function AdminPage() {

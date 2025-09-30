@@ -1,5 +1,5 @@
 import NextAuth from 'next-auth';
-import { getAuthOptions } from '../../../../lib/auth';
+import { getAuthOptions } from '../../auth-utils';
 
 const handler = async (req: Request, context: any) => {
   const authOptions = getAuthOptions();
