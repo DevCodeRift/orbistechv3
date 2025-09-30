@@ -1,0 +1,199 @@
+// Production Prisma schema for PostgreSQL
+// Use this for production deployment
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Core tenant table for multi-tenancy
+model Tenant {
+  id                     String    @id @default(cuid())
+  allianceId             Int       @unique @map("alliance_id")
+  allianceName           String    @map("alliance_name") @db.VarChar(100)
+  subdomain              String    @unique @db.VarChar(50)
+  discordAdminId         String    @map("discord_admin_id") @db.VarChar(20)
+  apiKeyEncrypted        String?   @map("api_key_encrypted") @db.Text
+  discordGuildId         String?   @map("discord_guild_id") @db.VarChar(20)
+  discordBotTokenEncrypted String? @map("discord_bot_token_encrypted") @db.Text
+  status                 TenantStatus @default(PENDING)
+  authorizedBy           String?   @map("authorized_by") @db.VarChar(20)
+  authorizedAt           DateTime? @map("authorized_at")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  users            User[]
+  allianceMembers  AllianceMember[]
+  wars             War[]
+  settings         TenantSettings?
+  invitations      TenantInvitation[]
+
+  @@map("tenants")
+}
+
+enum TenantStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+}
+
+// Users table with tenant association
+model User {
+  id        String   @id @default(cuid())
+  discordId String   @unique @map("discord_id") @db.VarChar(20)
+  username  String   @db.VarChar(50)
+  avatar    String?  @db.VarChar(255)
+  email     String?  @db.VarChar(255)
+  tenantId  String?  @map("tenant_id")
+  role      UserRole @default(MEMBER)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@map("users")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ALLIANCE_ADMIN
+  OFFICER
+  MEMBER
+}
+
+// Alliance members (P&W data)
+model AllianceMember {
+  id               String    @id @default(cuid())
+  tenantId         String    @map("tenant_id")
+  nationId         Int       @map("nation_id")
+  nationName       String    @map("nation_name") @db.VarChar(100)
+  leaderName       String    @map("leader_name") @db.VarChar(100)
+  discordId        String?   @map("discord_id") @db.VarChar(20)
+  position         String?   @db.VarChar(50)
+  positionId       Int?      @map("position_id")
+  cities           Int?
+  score            Decimal?  @db.Decimal(10, 2)
+  lastActive       DateTime? @map("last_active")
+  joinedAlliance   DateTime? @map("joined_alliance")
+  dataLastUpdated  DateTime  @default(now()) @map("data_last_updated")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  tenant        Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  attackerWars  War[]  @relation("AttackerWars")
+  defenderWars  War[]  @relation("DefenderWars")
+
+  @@unique([tenantId, nationId])
+  @@map("alliance_members")
+}
+
+// Wars table (tenant isolated)
+model War {
+  id              String    @id @default(cuid())
+  tenantId        String    @map("tenant_id")
+  warId           Int       @map("war_id")
+  attackerId      Int       @map("attacker_id")
+  defenderId      Int       @map("defender_id")
+  warType         String?   @map("war_type") @db.VarChar(50)
+  status          String?   @db.VarChar(20)
+  dateStarted     DateTime? @map("date_started")
+  dateEnded       DateTime? @map("date_ended")
+  dataLastUpdated DateTime  @default(now()) @map("data_last_updated")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  tenant   Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  attacker AllianceMember? @relation("AttackerWars", fields: [tenantId, attackerId], references: [tenantId, nationId])
+  defender AllianceMember? @relation("DefenderWars", fields: [tenantId, defenderId], references: [tenantId, nationId])
+  attacks  WarAttack[]
+
+  @@unique([tenantId, warId])
+  @@map("wars")
+}
+
+// War attacks
+model WarAttack {
+  id         String   @id @default(cuid())
+  warId      String   @map("war_id")
+  attackId   Int      @map("attack_id")
+  attackType String   @map("attack_type") @db.VarChar(50)
+  success    Boolean
+  damage     Decimal? @db.Decimal(10, 2)
+  date       DateTime
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  war War @relation(fields: [warId], references: [id], onDelete: Cascade)
+
+  @@unique([warId, attackId])
+  @@map("war_attacks")
+}
+
+// Settings per tenant
+model TenantSettings {
+  id                     String  @id @default(cuid())
+  tenantId               String  @unique @map("tenant_id")
+  autoSyncEnabled        Boolean @default(true) @map("auto_sync_enabled")
+  syncIntervalMinutes    Int     @default(30) @map("sync_interval_minutes")
+  warAlertsEnabled       Boolean @default(true) @map("war_alerts_enabled")
+  memberAlertsEnabled    Boolean @default(true) @map("member_alerts_enabled")
+  inactivityThresholdDays Int    @default(7) @map("inactivity_threshold_days")
+  settingsJson           Json    @default("{}") @map("settings_json") @db.JsonB
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("tenant_settings")
+}
+
+// Tenant invitations for Discord users
+model TenantInvitation {
+  id         String            @id @default(cuid())
+  tenantId   String            @map("tenant_id")
+  discordId  String            @map("discord_id") @db.VarChar(20)
+  role       UserRole          @default(MEMBER)
+  status     InvitationStatus  @default(PENDING)
+  invitedBy  String            @map("invited_by") @db.VarChar(20)
+  expiresAt  DateTime          @map("expires_at")
+  createdAt  DateTime          @default(now()) @map("created_at")
+  updatedAt  DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, discordId])
+  @@map("tenant_invitations")
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+// System audit log
+model AuditLog {
+  id        String   @id @default(cuid())
+  tenantId  String?  @map("tenant_id")
+  userId    String?  @map("user_id")
+  action    String   @db.VarChar(100)
+  resource  String   @db.VarChar(100)
+  details   Json?    @db.JsonB
+  ipAddress String?  @map("ip_address") @db.VarChar(45)
+  userAgent String?  @map("user_agent") @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}

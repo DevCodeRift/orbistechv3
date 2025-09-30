@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "buildCommand": "cd ../.. && npm run build --filter=@orbistech/web-app",
+  "outputDirectory": "apps/web-app/.next",
+  "installCommand": "cd ../.. && npm install",
+  "framework": "nextjs",
+  "functions": {
+    "app/api/**/*.js": {
+      "maxDuration": 30
+    }
+  }
+}

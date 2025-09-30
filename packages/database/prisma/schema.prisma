@@ -1,0 +1,178 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Core tenant table for multi-tenancy
+model Tenant {
+  id                     String    @id @default(cuid())
+  allianceId             Int       @unique @map("alliance_id")
+  allianceName           String    @map("alliance_name")
+  subdomain              String    @unique
+  discordAdminId         String    @map("discord_admin_id")
+  apiKeyEncrypted        String?   @map("api_key_encrypted")
+  discordGuildId         String?   @map("discord_guild_id")
+  discordBotTokenEncrypted String? @map("discord_bot_token_encrypted")
+  status                 String    @default("PENDING")
+  authorizedBy           String?   @map("authorized_by")
+  authorizedAt           DateTime? @map("authorized_at")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  users            User[]
+  allianceMembers  AllianceMember[]
+  wars             War[]
+  settings         TenantSettings?
+  invitations      TenantInvitation[]
+
+  @@map("tenants")
+}
+
+// Users table with tenant association
+model User {
+  id        String   @id @default(cuid())
+  discordId String   @unique @map("discord_id")
+  username  String
+  avatar    String?
+  email     String?
+  tenantId  String?  @map("tenant_id")
+  role      String   @default("MEMBER")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@map("users")
+}
+
+// Alliance members (P&W data)
+model AllianceMember {
+  id               String    @id @default(cuid())
+  tenantId         String    @map("tenant_id")
+  nationId         Int       @map("nation_id")
+  nationName       String    @map("nation_name")
+  leaderName       String    @map("leader_name")
+  discordId        String?   @map("discord_id")
+  position         String?
+  positionId       Int?      @map("position_id")
+  cities           Int?
+  score            Float?
+  lastActive       DateTime? @map("last_active")
+  joinedAlliance   DateTime? @map("joined_alliance")
+  dataLastUpdated  DateTime  @default(now()) @map("data_last_updated")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  tenant        Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  attackerWars  War[]  @relation("AttackerWars")
+  defenderWars  War[]  @relation("DefenderWars")
+
+  @@unique([tenantId, nationId])
+  @@map("alliance_members")
+}
+
+// Wars table (tenant isolated)
+model War {
+  id              String    @id @default(cuid())
+  tenantId        String    @map("tenant_id")
+  warId           Int       @map("war_id")
+  attackerId      Int       @map("attacker_id")
+  defenderId      Int       @map("defender_id")
+  warType         String?   @map("war_type")
+  status          String?
+  dateStarted     DateTime? @map("date_started")
+  dateEnded       DateTime? @map("date_ended")
+  dataLastUpdated DateTime  @default(now()) @map("data_last_updated")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  tenant   Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  attacker AllianceMember? @relation("AttackerWars", fields: [tenantId, attackerId], references: [tenantId, nationId])
+  defender AllianceMember? @relation("DefenderWars", fields: [tenantId, defenderId], references: [tenantId, nationId])
+  attacks  WarAttack[]
+
+  @@unique([tenantId, warId])
+  @@map("wars")
+}
+
+// War attacks
+model WarAttack {
+  id         String   @id @default(cuid())
+  warId      String   @map("war_id")
+  attackId   Int      @map("attack_id")
+  attackType String   @map("attack_type")
+  success    Boolean
+  damage     Float?
+  date       DateTime
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  war War @relation(fields: [warId], references: [id], onDelete: Cascade)
+
+  @@unique([warId, attackId])
+  @@map("war_attacks")
+}
+
+// Settings per tenant
+model TenantSettings {
+  id                     String  @id @default(cuid())
+  tenantId               String  @unique @map("tenant_id")
+  autoSyncEnabled        Boolean @default(true) @map("auto_sync_enabled")
+  syncIntervalMinutes    Int     @default(30) @map("sync_interval_minutes")
+  warAlertsEnabled       Boolean @default(true) @map("war_alerts_enabled")
+  memberAlertsEnabled    Boolean @default(true) @map("member_alerts_enabled")
+  inactivityThresholdDays Int    @default(7) @map("inactivity_threshold_days")
+  settingsJson           String  @default("{}") @map("settings_json")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("tenant_settings")
+}
+
+// Tenant invitations for Discord users
+model TenantInvitation {
+  id         String    @id @default(cuid())
+  tenantId   String    @map("tenant_id")
+  discordId  String    @map("discord_id")
+  role       String    @default("MEMBER")
+  status     String    @default("PENDING")
+  invitedBy  String    @map("invited_by")
+  expiresAt  DateTime  @map("expires_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, discordId])
+  @@map("tenant_invitations")
+}
+
+// System audit log
+model AuditLog {
+  id        String   @id @default(cuid())
+  tenantId  String?  @map("tenant_id")
+  userId    String?  @map("user_id")
+  action    String
+  resource  String
+  details   String?  // JSON string for SQLite
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}

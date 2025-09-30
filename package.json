@@ -1,0 +1,36 @@
+{
+  "name": "orbistechv3",
+  "version": "1.0.0",
+  "description": "Multi-tenant Politics and War Alliance Management System",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "test": "turbo run test",
+    "clean": "turbo run clean",
+    "db:generate": "turbo run db:generate",
+    "db:push": "turbo run db:push",
+    "db:migrate": "turbo run db:migrate",
+    "setup": "node scripts/setup.js",
+    "dev:web": "cd apps/web-app && npm run dev",
+    "dev:bot": "cd apps/discord-bot && npm run dev"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "turbo": "latest",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
