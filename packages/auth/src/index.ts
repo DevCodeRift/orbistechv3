@@ -30,11 +30,12 @@ export function createAuthOptions(config: AuthConfig = {}): NextAuthOptions {
             }
 
             // Create or update user
+            const discordProfile = profile as any;
             await UserService.createOrUpdateUser({
-              discordId: profile.id as string,
-              username: profile.username as string,
-              avatar: profile.avatar as string,
-              email: profile.email as string,
+              discordId: discordProfile.id as string,
+              username: discordProfile.username as string,
+              avatar: discordProfile.avatar as string,
+              email: discordProfile.email as string,
               tenantId: tenant?.id,
             });
 
@@ -48,7 +49,8 @@ export function createAuthOptions(config: AuthConfig = {}): NextAuthOptions {
       },
       async jwt({ token, account, profile }) {
         if (account?.provider === 'discord' && profile) {
-          const user = await UserService.findByDiscordId(profile.id as string);
+          const discordProfile = profile as any;
+          const user = await UserService.findByDiscordId(discordProfile.id as string);
           if (user) {
             token.discordId = user.discordId;
             token.role = user.role;

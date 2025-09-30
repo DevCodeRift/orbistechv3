@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { getAuthOptions } from '../../auth-utils';
+import { getAuthOptions } from '../../../auth-utils';
 import { validateTenantAccess } from '@orbistech/auth';
 import { prisma, TenantService } from '@orbistech/database';
 import { encryptApiKey } from '@orbistech/encryption';
@@ -115,10 +115,10 @@ export async function POST(request: NextRequest) {
         userId: session.user.discordId,
         action: 'API_KEY_SET',
         resource: 'tenant',
-        details: {
+        details: JSON.stringify({
           allianceId: tenant.allianceId,
           validatedAllianceId: validation.allianceId,
-        },
+        }),
         ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
         userAgent: request.headers.get('user-agent') || 'unknown',
       },

@@ -50,10 +50,7 @@ export type {
   WarAttack,
   TenantSettings,
   TenantInvitation,
-  AuditLog,
-  TenantStatus,
-  UserRole,
-  InvitationStatus
+  AuditLog
 } from '@prisma/client';
 
 // Helper functions
@@ -127,7 +124,7 @@ export class UserService {
     avatar?: string;
     email?: string;
     tenantId?: string;
-    role?: UserRole;
+    role?: string;
   }) {
     return prisma.user.upsert({
       where: { discordId: data.discordId },

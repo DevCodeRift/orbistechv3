@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth-utils';
+import { authOptions } from '../../../auth-utils';
 import { UserService, TenantService, prisma } from '@orbistech/database';
 
 export async function GET() {
@@ -94,12 +94,12 @@ export async function POST(request: NextRequest) {
         userId: session.user.discordId,
         action: 'TENANT_CREATED',
         resource: 'tenant',
-        details: {
+        details: JSON.stringify({
           allianceId: parseInt(allianceId),
           allianceName,
           subdomain,
           discordAdminId,
-        },
+        }),
         ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
         userAgent: request.headers.get('user-agent') || 'unknown',
       },

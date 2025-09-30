@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { headers } from 'next/headers';
-import { getAuthOptions } from '../auth-utils';
+import { getAuthOptions } from '../../auth-utils';
 import { validateTenantAccess } from '@orbistech/auth';
 import { TenantService } from '@orbistech/database';
 import { SetupForm } from './setup-form';

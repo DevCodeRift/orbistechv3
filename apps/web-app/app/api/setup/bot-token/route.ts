@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { getAuthOptions } from '../../auth-utils';
+import { getAuthOptions } from '../../../auth-utils';
 import { prisma, TenantService } from '@orbistech/database';
 import { encryptBotToken } from '@orbistech/encryption';
 
@@ -96,10 +96,10 @@ export async function POST(request: NextRequest) {
         userId: session.user.discordId,
         action: 'BOT_TOKEN_SET',
         resource: 'tenant',
-        details: {
+        details: JSON.stringify({
           botId: validation.botInfo?.id,
           botUsername: validation.botInfo?.username,
-        },
+        }),
         ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
         userAgent: request.headers.get('user-agent') || 'unknown',
       },
