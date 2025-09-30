@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { createAuthOptions } from '@orbistech/auth';
+import { getAuthOptions } from '../../../../lib/auth';
 import { prisma, TenantService } from '@orbistech/database';
 import { encryptBotToken } from '@orbistech/encryption';
 
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get session
-    const authOptions = createAuthOptions({ tenantSubdomain: subdomain });
+    const authOptions = getAuthOptions();
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.discordId) {

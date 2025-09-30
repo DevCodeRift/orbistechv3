@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { headers } from 'next/headers';
-import { createAuthOptions } from '@orbistech/auth';
+import { getAuthOptions } from '../../../lib/auth';
 import { TenantService } from '@orbistech/database';
 import { DashboardContent } from './dashboard-content';
 
@@ -13,7 +13,7 @@ async function getTenantAndSession() {
     return { error: 'No subdomain found' };
   }
 
-  const authOptions = createAuthOptions({ tenantSubdomain: subdomain });
+  const authOptions = getAuthOptions();
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.discordId) {
