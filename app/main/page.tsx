@@ -11,7 +11,7 @@ export default function LandingPage() {
           </p>
           <div className="space-x-4">
             <a
-              href="https://admin.orbistech.dev"
+              href="/admin"
               className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
             >
               Admin Dashboard
