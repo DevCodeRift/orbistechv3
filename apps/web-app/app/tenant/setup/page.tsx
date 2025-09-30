@@ -17,7 +17,7 @@ async function getTenantAndValidateAccess() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.discordId) {
-    redirect('/login');
+    redirect('/tenant/login');
   }
 
   const tenant = await TenantService.findBySubdomain(subdomain);

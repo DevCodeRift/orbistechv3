@@ -8,7 +8,7 @@ export default async function AdminPage() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.discordId) {
-    redirect('/login');
+    redirect('/admin/login');
   }
 
   // Check if user is super admin
