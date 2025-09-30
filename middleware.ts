@@ -91,6 +91,21 @@ export async function middleware(request: NextRequest) {
     isAdmin
   });
 
+  // Handle admin routes by URL path (takes priority over subdomain routing)
+  if (pathname.startsWith('/admin')) {
+    return NextResponse.next();
+  }
+
+  // Handle tenant routes by URL path (takes priority over subdomain routing)
+  if (pathname.startsWith('/tenant')) {
+    return NextResponse.next();
+  }
+
+  // Handle main routes by URL path (takes priority over subdomain routing)
+  if (pathname.startsWith('/main')) {
+    return NextResponse.next();
+  }
+
   // Handle admin subdomain - rewrite to admin route group
   if (isAdmin) {
     // Skip if already in admin route group
