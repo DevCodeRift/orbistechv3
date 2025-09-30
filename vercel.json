@@ -1,11 +1,15 @@
 {
   "version": 2,
-  "buildCommand": "cd apps/web-app && npm run build",
-  "outputDirectory": "apps/web-app/.next",
-  "installCommand": "npm install",
-  "functions": {
-    "apps/web-app/app/api/**/*.js": {
-      "maxDuration": 30
+  "builds": [
+    {
+      "src": "apps/web-app/package.json",
+      "use": "@vercel/next"
     }
-  }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "apps/web-app/$1"
+    }
+  ]
 }
