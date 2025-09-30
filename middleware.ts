@@ -18,6 +18,11 @@ function getTenantFromHost(hostname: string): { subdomain: string; isValidTenant
     };
   }
 
+  // For Vercel domains (*.vercel.app) - treat as main domain for now
+  if (hostname.includes('vercel.app')) {
+    return { subdomain: 'main', isValidTenant: false, isAdmin: false };
+  }
+
   // For production orbistech.dev domain
   if (hostname.includes('orbistech.dev') || hostname.includes('.dev')) {
     // Admin subdomain
@@ -68,6 +73,7 @@ function getTenantFromHost(hostname: string): { subdomain: string; isValidTenant
     };
   }
 
+  // Default fallback - treat as main domain
   return { subdomain: 'main', isValidTenant: false, isAdmin: false };
 }
 
@@ -75,6 +81,15 @@ export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
   const { subdomain, isValidTenant, isAdmin } = getTenantFromHost(hostname);
   const { pathname } = request.nextUrl;
+
+  // Debug logging for production
+  console.log('Middleware Debug:', {
+    hostname,
+    pathname,
+    subdomain,
+    isValidTenant,
+    isAdmin
+  });
 
   // Handle admin subdomain - rewrite to admin route group
   if (isAdmin) {
