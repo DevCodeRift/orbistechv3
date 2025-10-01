@@ -21,7 +21,11 @@
       "Bash(git rm:*)",
       "Bash(git commit:*)",
       "Bash(git config:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(vercel env pull:*)",
+      "Bash(cat:*)",
+      "Bash(vercel env add:*)",
+      "Bash(vercel env rm:*)"
     ],
     "deny": [],
     "ask": []

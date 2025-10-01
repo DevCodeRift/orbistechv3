@@ -153,3 +153,4 @@ discord-bot/logs/
 *.crt
 secrets/
 .secrets/
+.env*.local
