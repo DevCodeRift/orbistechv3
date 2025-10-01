@@ -91,6 +91,11 @@ export async function middleware(request: NextRequest) {
     isAdmin
   });
 
+  // Handle API routes first - never rewrite these
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
   // Handle admin routes by URL path (takes priority over subdomain routing)
   if (pathname.startsWith('/admin')) {
     return NextResponse.next();

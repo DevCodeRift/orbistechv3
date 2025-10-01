@@ -16,4 +16,6 @@ export function getAuthOptions() {
 }
 
 // Export a default auth options for when tenant context is not available
-export const authOptions = createAuthOptions({});
+export const authOptions = createAuthOptions({
+  // Override redirect config for multi-domain setup
+});

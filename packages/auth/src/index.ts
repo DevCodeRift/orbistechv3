@@ -77,7 +77,7 @@ export function createAuthOptions(config: AuthConfig = {}): NextAuthOptions {
         if (config.tenantSubdomain) {
           const tenantUrl = url.includes('localhost')
             ? 'http://localhost:3001'
-            : `https://${config.tenantSubdomain}.domain.com`;
+            : `https://${config.tenantSubdomain}.orbistech.dev`;
 
           if (url.startsWith('/')) {
             return `${tenantUrl}${url}`;
@@ -88,7 +88,9 @@ export function createAuthOptions(config: AuthConfig = {}): NextAuthOptions {
           return `${tenantUrl}/dashboard`;
         }
 
-        return url.startsWith('/') ? `${baseUrl}${url}` : baseUrl;
+        // For main domain redirects, ensure we use the correct base URL
+        const mainUrl = process.env.NEXTAUTH_URL || baseUrl;
+        return url.startsWith('/') ? `${mainUrl}${url}` : mainUrl;
       },
     },
     pages: {
