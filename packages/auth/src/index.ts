@@ -7,11 +7,30 @@ export interface AuthConfig {
 }
 
 export function createAuthOptions(config: AuthConfig = {}): NextAuthOptions {
+  const clientId = process.env.DISCORD_CLIENT_ID;
+  const clientSecret = process.env.DISCORD_CLIENT_SECRET;
+  const secret = process.env.NEXTAUTH_SECRET;
+
+  console.log('Creating auth options with:', {
+    hasClientId: !!clientId,
+    hasClientSecret: !!clientSecret,
+    hasSecret: !!secret,
+    config,
+  });
+
+  if (!clientId || !clientSecret || !secret) {
+    console.error('Missing required environment variables:', {
+      clientId: !!clientId,
+      clientSecret: !!clientSecret,
+      secret: !!secret,
+    });
+  }
+
   return {
     providers: [
       DiscordProvider({
-        clientId: process.env.DISCORD_CLIENT_ID!,
-        clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+        clientId: clientId!,
+        clientSecret: clientSecret!,
         authorization: {
           params: {
             scope: 'identify email guilds',
