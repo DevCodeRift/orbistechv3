@@ -25,7 +25,8 @@
       "Bash(vercel env pull:*)",
       "Bash(cat:*)",
       "Bash(vercel env add:*)",
-      "Bash(vercel env rm:*)"
+      "Bash(vercel env rm:*)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": []
