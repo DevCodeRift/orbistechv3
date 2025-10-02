@@ -3,8 +3,9 @@
 import { signIn, getSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function MainLoginPage() {
+function LoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -129,5 +130,19 @@ export default function MainLoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function MainLoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-3xl font-extrabold text-gray-900">Loading...</h2>
+        </div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }
