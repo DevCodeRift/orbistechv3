@@ -106,6 +106,30 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Handle alliance path-based routing: /alliance/[subdomain]
+  if (pathname.startsWith('/alliance/')) {
+    const pathParts = pathname.split('/');
+    if (pathParts.length >= 3) {
+      const allianceSubdomain = pathParts[2];
+
+      // Clone the request headers and add tenant info
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set('x-tenant-subdomain', allianceSubdomain);
+      requestHeaders.set('x-hostname', hostname);
+
+      // Rewrite to tenant route with remaining path
+      const remainingPath = '/' + pathParts.slice(3).join('/');
+      const newUrl = request.nextUrl.clone();
+      newUrl.pathname = `/tenant${remainingPath || ''}`;
+
+      return NextResponse.rewrite(newUrl, {
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    }
+  }
+
   // Handle main routes by URL path (takes priority over subdomain routing)
   if (pathname.startsWith('/main')) {
     return NextResponse.next();
@@ -174,6 +198,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/tenant/dashboard', request.url));
     }
 
+    // Always pass tenant headers for all tenant routes
     return NextResponse.next({
       request: {
         headers: requestHeaders,

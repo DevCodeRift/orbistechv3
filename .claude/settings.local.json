@@ -27,7 +27,8 @@
       "Bash(vercel env add:*)",
       "Bash(vercel env rm:*)",
       "Bash(echo:*)",
-      "WebFetch(domain:discord.com)"
+      "WebFetch(domain:discord.com)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

@@ -88,6 +88,11 @@ export function createAuthOptions(config: AuthConfig = {}): NextAuthOptions {
           return `${tenantUrl}/dashboard`;
         }
 
+        // Handle cross-domain OAuth callback URLs
+        if (url.startsWith('https://') && url.includes('.orbistech.dev')) {
+          return url; // Allow redirects to any orbistech.dev subdomain
+        }
+
         // For main domain redirects, ensure we use the correct base URL
         const mainUrl = process.env.NEXTAUTH_URL || baseUrl;
         return url.startsWith('/') ? `${mainUrl}${url}` : mainUrl;

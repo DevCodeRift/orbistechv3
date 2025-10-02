@@ -14,26 +14,18 @@ export function LoginForm() {
     try {
       setIsLoading(true);
 
-      const result = await signIn('discord', {
-        callbackUrl,
-        redirect: false,
-      });
+      // Get current URL to return to after OAuth
+      const currentUrl = window.location.href;
 
-      if (result?.error) {
-        console.error('Login error:', result.error);
-        // Handle error (show toast, etc.)
-      } else if (result?.url) {
-        router.push(result.url);
-      } else {
-        // Check if login was successful
-        const session = await getSession();
-        if (session) {
-          router.push(callbackUrl);
-        }
-      }
+      // Redirect to main domain OAuth with return URL
+      const oauthUrl = new URL('/api/auth/signin/discord', 'https://www.orbistech.dev');
+      oauthUrl.searchParams.set('callbackUrl', currentUrl.replace('/login', '/dashboard'));
+
+      // Redirect to main domain for OAuth
+      window.location.href = oauthUrl.toString();
+
     } catch (error) {
       console.error('Login error:', error);
-    } finally {
       setIsLoading(false);
     }
   };
