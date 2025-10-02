@@ -76,6 +76,14 @@ export class TenantService {
     });
   }
 
+  static async findAll() {
+    return prisma.tenant.findMany({
+      include: {
+        settings: true,
+      },
+    });
+  }
+
   static async getActiveTenants() {
     return prisma.tenant.findMany({
       where: { status: 'ACTIVE' },
